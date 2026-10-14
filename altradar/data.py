@@ -31,12 +31,17 @@ class Series:
 def _get(path, params):
     query = urllib.parse.urlencode(params)
     last_err = None
-    for base in BASE_URLS:
+    for base in list(BASE_URLS):
         try:
             with urllib.request.urlopen(f"{base}{path}?{query}", timeout=20) as r:
-                return json.load(r)
+                out = json.load(r)
         except Exception as e:  # try the next mirror
             last_err = e
+            continue
+        if base != BASE_URLS[0]:  # e.g. api.binance.com returns 451 in restricted regions
+            BASE_URLS.remove(base)
+            BASE_URLS.insert(0, base)
+        return out
     raise RuntimeError(f"Không tải được {path} từ Binance: {last_err}")
 
 
