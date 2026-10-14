@@ -46,7 +46,9 @@ def load(args, symbols=None):
 def _cached(symbol, days):
     path = os.path.join(CACHE, f"{symbol}_{days}.csv")
     if os.path.exists(path) and _fresh(path):
-        return data.load_csv(path)
+        s = data.load_csv(path)
+        s.symbol = symbol  # file name carries the _<days> suffix
+        return s
     s = data.fetch_daily(symbol, days)
     data.save_csv(s, path)
     return s
